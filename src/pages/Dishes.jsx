@@ -9,6 +9,7 @@ export default function Dishes() {
   const [analytics, setAnalytics] = useState(null)
   const [orderItems, setOrderItems] = useState([])
   const [bills, setBills] = useState([])
+  const [error, setError] = useState(null)
 
   const fetchDishes = async () => {
     const { data } = await supabase.from('dish').select('*')
@@ -104,7 +105,12 @@ export default function Dishes() {
   }
 
   const handleDelete = async id => {
-    await supabase.from('dish').delete().eq('dishid', id)
+    setError(null)
+    const { error } = await supabase.from('dish').delete().eq('dishid', id)
+    if (error) {
+      setError('Failed to delete dish: ' + error.message)
+      return
+    }
     fetchDishes()
   }
 
@@ -240,6 +246,7 @@ export default function Dishes() {
           </div>
         </div>
       )}
+      {error && <div style={{ color: 'red' }}>{error}</div>}
     </div>
   )
 } 

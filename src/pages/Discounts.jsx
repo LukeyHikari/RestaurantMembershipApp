@@ -152,7 +152,12 @@ export default function Discounts() {
   }
 
   const handleDelete = async id => {
-    await supabase.from('discount').delete().eq('discountid', id)
+    setError(null)
+    const { error } = await supabase.from('discount').delete().eq('discountid', id)
+    if (error) {
+      setError('Failed to delete discount: ' + error.message)
+      return
+    }
     fetchDiscounts()
   }
 

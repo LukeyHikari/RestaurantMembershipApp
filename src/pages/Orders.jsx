@@ -9,6 +9,7 @@ export default function Orders() {
   const [orderForm, setOrderForm] = useState({ billid: '', orderdate: '' })
   const [orderDishes, setOrderDishes] = useState([])
   const [editing, setEditing] = useState(null)
+  const [error, setError] = useState(null)
 
   // Fetch all related data
   useEffect(() => {
@@ -71,8 +72,17 @@ export default function Orders() {
 
   // Delete order
   const handleDelete = async id => {
-    await supabase.from('orderslist').delete().eq('ordersid', id)
-    await supabase.from('orders').delete().eq('ordersid', id)
+    setError(null)
+    const { error: error1 } = await supabase.from('orderslist').delete().eq('ordersid', id)
+    if (error1) {
+      setError('Failed to delete order items: ' + error1.message)
+      return
+    }
+    const { error: error2 } = await supabase.from('orders').delete().eq('ordersid', id)
+    if (error2) {
+      setError('Failed to delete order: ' + error2.message)
+      return
+    }
     supabase.from('orders').select('*').then(({ data }) => setOrders(data || []))
   }
 
@@ -102,6 +112,7 @@ export default function Orders() {
         <button type="submit">{editing ? 'Update' : 'Add'} Order</button>
         {editing && <button type="button" onClick={() => { setEditing(null); setOrderForm({ billid: '', orderdate: '' }); setOrderDishes([]) }}>Cancel</button>}
       </form>
+      {error && <div style={{ color: 'red' }}>{error}</div>}
       <ul>
         {orders.map(o => (
           <li key={o.ordersid}>

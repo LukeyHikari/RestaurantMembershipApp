@@ -46,7 +46,12 @@ export default function Members() {
   }
 
   const handleDelete = async id => {
-    await supabase.from('member').delete().eq('memberid', id)
+    setError(null)
+    const { error } = await supabase.from('member').delete().eq('memberid', id)
+    if (error) {
+      setError('Failed to delete member: ' + error.message)
+      return
+    }
     fetchMembers()
   }
 

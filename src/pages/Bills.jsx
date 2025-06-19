@@ -208,8 +208,12 @@ export default function Bills() {
   }
 
   const handleDelete = async billid => {
-    // Delete the bill
-    await supabase.from('bill').delete().eq('billid', billid)
+    setError(null)
+    const { error } = await supabase.from('bill').delete().eq('billid', billid)
+    if (error) {
+      setError('Failed to delete bill: ' + error.message)
+      return
+    }
     // Unlink bill from any orders
     await supabase.from('orders').update({ billid: null }).eq('billid', billid)
     fetchBills()
